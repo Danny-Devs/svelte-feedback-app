@@ -1,13 +1,17 @@
 <script>
+  import {FeedbackStore} from '../stores'
+  import { v4 as uuidv4 } from 'uuid'
   import Card from './Card.svelte'
   import Button from './Button.svelte'
-  import RatingsSelect from './RatingSelect.svelte'
+  import RatingSelect from './RatingSelect.svelte'
 
   let text = ''
   let rating = 10
   let btnDisabled = true
   let min = 10
   let message
+
+  const handleSelect = (e) => (rating = e.detail)
 
   const handleInput = () => {
     if (text.trim().length <= min) {
@@ -18,14 +22,27 @@
       btnDisabled = false
     }
   }
+
+  const handleSubmit = (e) => {
+    if (text.trim().length > min) {
+      const newFeedback = {
+        id: uuidv4(),
+        text,
+        rating: +rating,
+      }
+
+      FeedbackStore.update((currentFeedback) => [newFeedback, ...currentFeedback])
+      text = ''
+    }
+  }
 </script>
 
 <Card>
   <header>
     <h2>How would you rate our service with us?</h2>
   </header>
-  <form>
-    <RatingsSelect />
+  <form on:submit|preventDefault={handleSubmit}>
+    <RatingSelect on:rating-select={handleSelect} />
     <div class="input-group">
       <input
         type="text"
